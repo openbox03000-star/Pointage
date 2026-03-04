@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Mes Heures Pro</title>
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MesHeures Pro">
+<meta name="theme-color" content="#0f1117">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#222535; --border:#2e3147;
+  --accent:#6c63ff; --green:#43e97b; --yellow:#f9ca24; --pink:#ff6584;
+  --text:#e8eaf6; --text2:#8b8fa8; --r:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);max-width:480px;margin:0 auto;min-height:100vh;}
+.header{background:linear-gradient(135deg,#1a1d27,#12152a);padding:20px 20px 0;border-bottom:1px solid var(--border);}
+.header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.logo{font-size:20px;font-weight:700;}.logo span{color:var(--accent);}
+.date-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--text2);font-family:'DM Mono',monospace;}
+.tabs{display:flex;}
+.tab{flex:1;text-align:center;padding:12px 4px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.page{display:none;padding:20px;}
+.page.active{display:block;}
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;}
+.sl{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+.sv{font-size:20px;font-weight:700;font-family:'DM Mono',monospace;}
+.sv.g{color:var(--green);}.sv.p{color:var(--accent);}.sv.y{color:var(--yellow);}.sv.k{color:var(--pink);}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px;}
+.card-title{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500;}
+.field input,.field select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;}
+.field input:focus,.field select:focus{border-color:var(--accent);}
+.field select option{background:var(--surface2);}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.dur-wrap{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.dur-part label{display:block;font-size:11px;color:var(--text2);margin-bottom:5px;}
+.dur-part input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;color:var(--text);font-family:'DM Mono',monospace;font-size:22px;font-weight:700;text-align:center;outline:none;}
+.dur-part input:focus{border-color:var(--accent);}
+.km-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+.km-val{font-family:'DM Mono',monospace;font-size:15px;color:var(--yellow);}
+.km-sub{font-size:11px;color:var(--text2);margin-top:3px;}
+.km-toggle{font-size:11px;color:var(--accent);cursor:pointer;margin-top:6px;display:inline-block;}
+.btn{width:100%;border:none;border-radius:12px;padding:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#8b84ff);color:white;}
+.btn-maps{background:linear-gradient(135deg,#34a853,#4285f4);color:white;border:none;border-radius:10px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-del{background:none;border:1px solid #ff4757;border-radius:8px;padding:6px 10px;color:#ff4757;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;}
+.entry-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;}
+.e-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.e-info{flex:1;min-width:0;}
+.e-name{font-size:14px;font-weight:600;}
+.e-meta{font-size:12px;color:var(--text2);margin-top:2px;}
+.e-amt{text-align:right;flex-shrink:0;}
+.e-sal{font-size:15px;font-weight:700;color:var(--green);font-family:'DM Mono',monospace;}
+.e-km{font-size:11px;color:var(--yellow);font-family:'DM Mono',monospace;}
+.emp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+.emp-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.emp-name-row{display:flex;align-items:center;gap:10px;}
+.emp-dot{width:14px;height:14px;border-radius:4px;}
+.emp-name{font-size:15px;font-weight:600;}
+.emp-rate{font-size:14px;font-weight:700;color:var(--accent);font-family:'DM Mono',monospace;}
+.emp-details{font-size:12px;color:var(--text2);line-height:1.7;}
+.collapse-btn{width:100%;background:none;border:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
+.filter-row{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;}
+.pill{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:7px 14px;font-size:12px;color:var(--text2);cursor:pointer;white-space:nowrap;}
+.pill.active{background:var(--accent);border-color:var(--accent);color:white;}
+.recap-emp{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;}
+.recap-name{font-size:14px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.recap-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.rs{text-align:center;}
+.rsv{font-size:14px;font-weight:700;font-family:'DM Mono',monospace;}
+.rsl{font-size:10px;color:var(--text2);}
+.total-bar{background:linear-gradient(135deg,#1a2a3a,#1a1d27);border:1px solid var(--accent);border-radius:var(--r);padding:16px 20px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
+.tl{font-size:12px;color:var(--text2);margin-bottom:3px;}
+.tv{font-size:20px;font-weight:700;color:var(--green);font-family:'DM Mono',monospace;}
+.export-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+.eb{border:none;border-radius:12px;padding:13px 10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
+.eb-csv{background:linear-gradient(135deg,#43e97b,#38f9d7);color:#0f1117;}
+.eb-ann{background:linear-gradient(135deg,#f9ca24,#f0932b);color:#0f1117;}
+.eb-pdf{grid-column:1/-1;background:linear-gradient(135deg,var(--accent),#8b84ff);color:white;}
+.home-bar{background:var(--surface2);border:1px solid var(--accent);border-radius:10px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.hb-info span{font-size:11px;color:var(--text2);}
+.hb-info strong{display:block;font-size:13px;color:var(--text);margin-top:2px;}
+.hb-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:11px;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.toggle-sw{position:relative;display:inline-block;width:46px;height:26px;flex-shrink:0;}
+.toggle-sw input{opacity:0;width:0;height:0;}
+.toggle-track{position:absolute;cursor:pointer;inset:0;background:var(--border);border-radius:13px;transition:.3s;}
+.toggle-track:before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:white;border-radius:50%;transition:.3s;}
+input:checked+.toggle-track{background:var(--accent);}
+input:checked+.toggle-track:before{transform:translateX(20px);}
+.info-box{background:rgba(108,99,255,.1);border:1px solid var(--accent);border-radius:10px;padding:12px;text-align:center;margin-top:12px;}
+.sec-title{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
+.empty{text-align:center;padding:40px 20px;color:var(--text2);}
+.empty .ic{font-size:40px;margin-bottom:12px;}
+.empty p{font-size:14px;}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--green);color:#0f1117;padding:12px 24px;border-radius:20px;font-weight:600;font-size:14px;transition:transform .3s;z-index:999;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo">Mes<span>Heures</span> Pro</div>
+    <div class="date-badge" id="currentDate"></div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="goPage('saisie',this)">⏱ Saisie</div>
+    <div class="tab" onclick="goPage('historique',this)">📋 Historique</div>
+    <div class="tab" onclick="goPage('recap',this)">📊 Récap</div>
+    <div class="tab" onclick="goPage('employeurs',this)">👤 Employeurs</div>
+  </div>
+</div>
+
+<!-- ===== SAISIE ===== -->
+<div class="page active" id="page-saisie">
+  <div style="margin-top:20px"></div>
+  <div class="stats-row">
+    <div class="sc"><div class="sl">Ce mois</div><div class="sv g" id="st-sal">0 €</div></div>
+    <div class="sc"><div class="sl">Km ce mois</div><div class="sv y" id="st-km">0 km</div></div>
+    <div class="sc"><div class="sl">Heures</div><div class="sv p" id="st-h">0h</div></div>
+    <div class="sc"><div class="sl">Frais km</div><div class="sv k" id="st-frais">0 €</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">➕ Nouvelle intervention</div>
+    <div class="field">
+      <label>Employeur</label>
+      <select id="sel-emp" onchange="onEmpChange()"><option value="">-- Choisir --</option></select>
+    </div>
+    <div class="field">
+      <label>Date</label>
+      <input type="date" id="in-date">
+    </div>
+    <div class="field">
+      <label>Durée de l'intervention</label>
+      <div class="dur-wrap">
+        <div class="dur-part"><label>Heures</label><input type="number" id="dur-h" placeholder="0" min="0" max="24"></div>
+        <div class="dur-part"><label>Minutes</label><input type="number" id="dur-m" placeholder="0" min="0" max="59"></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Kilomètres aller-retour</label>
+      <div class="km-box" id="km-auto-box">
+        <div class="km-val" id="km-auto-val">Sélectionnez un employeur</div>
+        <div class="km-sub" id="km-auto-sub"></div>
+      </div>
+      <span class="km-toggle" onclick="toggleKmManual()">✏️ Modifier manuellement</span>
+      <input type="number" id="in-km-manual" placeholder="km aller-retour" min="0" style="display:none;margin-top:8px">
+    </div>
+    <div class="field">
+      <label>Note (optionnel)</label>
+      <input type="text" id="in-note" placeholder="ex: ménage + repassage">
+    </div>
+    <button class="btn btn-primary" onclick="addEntry()">✅ Enregistrer</button>
+  </div>
+</div>
+
+<!-- ===== HISTORIQUE ===== -->
+<div class="page" id="page-historique">
+  <div style="margin-top:20px"></div>
+  <div class="sec-title">Dernières interventions</div>
+  <div id="list-entries"></div>
+</div>
+
+<!-- ===== RECAP ===== -->
+<div class="page" id="page-recap">
+  <div style="margin-top:20px"></div>
+  <div class="filter-row" id="month-filters"></div>
+  <div id="recap-content"></div>
+</div>
+
+<!-- ===== EMPLOYEURS ===== -->
+<div class="page" id="page-employeurs">
+  <div style="margin-top:20px"></div>
+
+  <!-- Domicile -->
+  <div class="home-bar">
+    <div class="hb-info">
+      <span>🏠 Mon domicile (point de départ)</span>
+      <strong id="home-display">Non renseigné</strong>
+    </div>
+    <button class="hb-btn" onclick="setHome()">Modifier</button>
+  </div>
+
+  <!-- Véhicule & barème fiscal -->
+  <div class="card">
+    <div class="card-title">⚙️ Mon véhicule — Barème fiscal</div>
+    <div class="field">
+      <label>Puissance fiscale (case P6 de votre carte grise)</label>
+      <select id="sel-cv" onchange="saveVehicule()">
+        <option value="3">3 CV ou moins</option>
+        <option value="4">4 CV</option>
+        <option value="5">5 CV</option>
+        <option value="6">6 CV</option>
+        <option value="7">7 CV et plus</option>
+      </select>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:0">
+      <div>
+        <div style="font-size:14px;font-weight:600">⚡ Véhicule électrique</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">Majoration légale de +20% (Renault Zoé, etc.)</div>
+      </div>
+      <label class="toggle-sw">
+        <input type="checkbox" id="chk-elec" onchange="saveVehicule()">
+        <span class="toggle-track"></span>
+      </label>
+    </div>
+    <div class="info-box">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Taux appliqué (estimé sur 8 000 km/an)</div>
+      <div style="font-size:20px;font-weight:700;color:var(--yellow);font-family:'DM Mono',monospace" id="taux-preview">—</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:4px">Barème officiel impôts.gouv.fr 2024 · Se recalcule selon vos km annuels réels</div>
+    </div>
+  </div>
+
+  <!-- Ajouter employeur -->
+  <div class="card">
+    <button class="collapse-btn" onclick="toggleAddForm()">
+      <span>➕ Ajouter un employeur</span><span id="toggle-icon">▼</span>
+    </button>
+    <div id="add-form" style="display:none;margin-top:16px">
+      <div class="field"><label>Nom / Prénom</label><input type="text" id="emp-name" placeholder="ex: Mme Dupont"></div>
+      <div class="field">
+        <label>Adresse complète</label>
+        <input type="text" id="emp-address" placeholder="ex: 12 rue des Lilas, Lyon 69003" oninput="onAddressInput()">
+      </div>
+      <div class="row2">
+        <div class="field"><label>Taux horaire (€)</label><input type="number" id="emp-rate" placeholder="13.50" step="0.01" min="0"></div>
+        <div class="field"><label>Téléphone</label><input type="tel" id="emp-phone" placeholder="06..."></div>
+      </div>
+      <div class="field">
+        <label>Distance aller (km)</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="number" id="emp-km" placeholder="ex: 12.5" min="0" step="0.1" style="flex:1">
+          <button type="button" id="maps-btn" onclick="openMaps()" class="btn-maps" style="opacity:.4;pointer-events:none">🗺️ Calculer</button>
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:5px">Entrez l'adresse ci-dessus → appuyez <strong style="color:var(--accent)">Calculer</strong> → Google Maps s'ouvre avec l'itinéraire → notez la distance aller ici.</div>
+      </div>
+      <button class="btn btn-primary" onclick="addEmployer()">✅ Enregistrer l'employeur</button>
+    </div>
+  </div>
+
+  <!-- Sauvegarde & Restauration -->
+  <div class="card" style="border-color:var(--yellow)">
+    <div class="card-title" style="color:var(--yellow)">💾 Sauvegarde & Restauration</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.6">Exportez toutes vos données en 1 fichier pour les sauvegarder ou les transférer sur un autre téléphone.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button onclick="backupData()" style="background:linear-gradient(135deg,#f9ca24,#f0932b);border:none;border-radius:12px;padding:13px 10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;color:#0f1117">💾 Sauvegarder</button>
+      <button onclick="document.getElementById('restore-input').click()" style="background:var(--surface2);border:1px solid var(--yellow);border-radius:12px;padding:13px 10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;color:var(--yellow)">📂 Restaurer</button>
+    </div>
+    <input type="file" id="restore-input" accept=".json" style="display:none" onchange="restoreData(event)">
+    <div style="font-size:11px;color:var(--text2);margin-top:10px;text-align:center">⚠️ Sauvegardez régulièrement pour ne pas perdre vos données si Chrome est vidé</div>
+  </div>
+
+  <div class="sec-title">Mes employeurs (<span id="emp-count">0</span>)</div>
+  <div id="list-employers"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── BARÈME FISCAL OFFICIEL 2024 (impôts.gouv.fr) ──
+const BAREME = {
+  3: [{max:5000,  a:0.529, b:0},     {max:20000, a:0.316, b:1065}, {max:Infinity, a:0.370, b:0}],
+  4: [{max:5000,  a:0.606, b:0},     {max:20000, a:0.340, b:1330}, {max:Infinity, a:0.407, b:0}],
+  5: [{max:5000,  a:0.636, b:0},     {max:20000, a:0.357, b:1395}, {max:Infinity, a:0.421, b:0}],
+  6: [{max:5000,  a:0.665, b:0},     {max:20000, a:0.374, b:1457}, {max:Infinity, a:0.435, b:0}],
+  7: [{max:5000,  a:0.697, b:0},     {max:20000, a:0.394, b:1515}, {max:Infinity, a:0.451, b:0}],
+};
+
+// ── DONNÉES ──
+let employers = JSON.parse(localStorage.getItem('mhp_emp') || '[]');
+let entries   = JSON.parse(localStorage.getItem('mhp_ent') || '[]');
+let homeAddr  = localStorage.getItem('mhp_home') || '';
+let vCV       = parseInt(localStorage.getItem('mhp_cv'))  || 4;
+let vElec     = localStorage.getItem('mhp_elec') === 'true';
+let kmManual  = false;
+let curMonth  = null;
+
+const COLORS = ['#6c63ff','#ff6584','#43e97b','#f9ca24','#00d2ff','#ff9f43','#a29bfe','#fd79a8','#55efc4','#fdcb6e','#74b9ff','#e17055'];
+
+function save() {
+  localStorage.setItem('mhp_emp',  JSON.stringify(employers));
+  localStorage.setItem('mhp_ent',  JSON.stringify(entries));
+  localStorage.setItem('mhp_home', homeAddr);
+  localStorage.setItem('mhp_cv',   vCV);
+  localStorage.setItem('mhp_elec', vElec);
+}
+
+// ── BARÈME ──
+function getKey() { return Math.min(Math.max(vCV, 3), 7); }
+
+function calcFrais(km, totalKmAn) {
+  if (km <= 0) return 0;
+  const tranches = BAREME[getKey()];
+  const t = tranches.find(tr => totalKmAn <= tr.max);
+  let frais = t.b > 0 ? (t.a * km + t.b * (km / totalKmAn)) : t.a * km;
+  if (vElec) frais *= 1.2;
+  return Math.round(frais * 100) / 100;
+}
+
+function tauxEstime(kmAn) {
+  if (kmAn <= 0) return 0;
+  const tranches = BAREME[getKey()];
+  const t = tranches.find(tr => kmAn <= tr.max);
+  let taux = t.b > 0 ? (t.a * kmAn + t.b) / kmAn : t.a;
+  if (vElec) taux *= 1.2;
+  return Math.round(taux * 1000) / 1000;
+}
+
+function kmAnCourant() {
+  const y = new Date().getFullYear();
+  return entries.filter(e => e.date.startsWith(y)).reduce((s, e) => s + (e.km || 0), 0);
+}
+
+// ── TOAST ──
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── NAVIGATION ──
+function goPage(page, tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  tab.classList.add('active');
+  if (page === 'saisie')     { refreshStats(); refreshEmpSelect(); }
+  if (page === 'historique') renderEntries();
+  if (page === 'recap')      renderRecap();
+  if (page === 'employeurs') renderEmployeurs();
+}
+
+// ── DOMICILE ──
+function setHome() {
+  const a = prompt('Votre adresse domicile :', homeAddr);
+  if (a !== null) { homeAddr = a.trim(); save(); document.getElementById('home-display').textContent = homeAddr || 'Non renseigné'; }
+}
+
+// ── VÉHICULE ──
+function saveVehicule() {
+  vCV   = parseInt(document.getElementById('sel-cv').value);
+  vElec = document.getElementById('chk-elec').checked;
+  save();
+  updateTauxPreview();
+  toast('✅ Véhicule mis à jour');
+}
+
+function updateTauxPreview() {
+  const el = document.getElementById('taux-preview');
+  if (!el) return;
+  const t = tauxEstime(8000);
+  el.textContent = t.toFixed(3).replace('.', ',') + ' €/km' + (vElec ? ' (⚡ +20%)' : '');
+}
+
+function initVehiculeUI() {
+  const s = document.getElementById('sel-cv');
+  const c = document.getElementById('chk-elec');
+  if (s) s.value = String(vCV);
+  if (c) c.checked = vElec;
+  updateTauxPreview();
+}
+
+// ── ADD EMPLOYER ──
+function toggleAddForm() {
+  const f = document.getElementById('add-form');
+  const shown = f.style.display !== 'none';
+  f.style.display = shown ? 'none' : 'block';
+  document.getElementById('toggle-icon').textContent = shown ? '▼' : '▲';
+}
+
+function onAddressInput() {
+  const addr = document.getElementById('emp-address').value.trim();
+  const btn  = document.getElementById('maps-btn');
+  if (btn) { btn.style.opacity = addr ? '1' : '.4'; btn.style.pointerEvents = addr ? 'auto' : 'none'; }
+}
+
+function openMaps() {
+  const dest = document.getElementById('emp-address').value.trim();
+  if (!dest) { toast('⚠️ Entrez l\'adresse d\'abord'); return; }
+  const base = 'https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' + encodeURIComponent(dest);
+  const url  = homeAddr ? base + '&origin=' + encodeURIComponent(homeAddr) : base;
+  if (!homeAddr) toast('💡 Renseignez votre domicile pour l\'itinéraire complet');
+  window.open(url, '_blank');
+}
+
+function addEmployer() {
+  const name    = document.getElementById('emp-name').value.trim();
+  const address = document.getElementById('emp-address').value.trim();
+  const rate    = parseFloat(document.getElementById('emp-rate').value);
+  const phone   = document.getElementById('emp-phone').value.trim();
+  const kmAller = parseFloat(document.getElementById('emp-km').value) || null;
+  if (!name || !rate) { toast('⚠️ Nom et taux requis'); return; }
+  employers.push({ id: Date.now(), name, address, rate, phone, kmAller, color: COLORS[employers.length % COLORS.length] });
+  save();
+  ['emp-name','emp-address','emp-rate','emp-phone','emp-km'].forEach(id => document.getElementById(id).value = '');
+  renderEmployeurs();
+  toast('✅ Employeur ajouté !');
+}
+
+function delEmployer(id) {
+  if (!confirm('Supprimer cet employeur ?')) return;
+  employers = employers.filter(e => e.id !== id);
+  save(); renderEmployeurs(); toast('🗑 Supprimé');
+}
+
+function renderEmployeurs() {
+  document.getElementById('home-display').textContent = homeAddr || 'Non renseigné';
+  document.getElementById('emp-count').textContent = employers.length;
+  initVehiculeUI();
+  const list = document.getElementById('list-employers');
+  if (!employers.length) { list.innerHTML = '<div class="empty"><div class="ic">👥</div><p>Ajoutez vos employeurs.</p></div>'; return; }
+  list.innerHTML = employers.map(e => {
+    const kmAR = e.kmAller ? (e.kmAller * 2) : null;
+    const fraisEst = kmAR ? calcFrais(kmAR, Math.max(kmAnCourant() + kmAR, kmAR)) : null;
+    return `<div class="emp-card">
+      <div class="emp-hdr">
+        <div class="emp-name-row"><div class="emp-dot" style="background:${e.color}"></div><div class="emp-name">${e.name}</div></div>
+        <div class="emp-rate">${e.rate.toFixed(2)} €/h</div>
+      </div>
+      <div class="emp-details">
+        ${e.address ? '📍 ' + e.address + '<br>' : ''}
+        ${e.phone   ? '📞 ' + e.phone + '<br>' : ''}
+        ${kmAR ? `🚗 ${kmAR} km A/R · <span style="color:var(--yellow)">≈ ${fraisEst} € frais (barème fiscal)</span>` : '<span style="color:var(--pink)">⚠️ Distance non renseignée</span>'}
+      </div>
+      <div style="margin-top:10px;text-align:right"><button class="btn-del" onclick="delEmployer(${e.id})">🗑 Supprimer</button></div>
+    </div>`;
+  }).join('');
+}
+
+// ── SELECT EMPLOYER ──
+function refreshEmpSelect() {
+  const sel = document.getElementById('sel-emp');
+  const v   = sel.value;
+  sel.innerHTML = '<option value="">-- Choisir --</option>' + employers.map(e => `<option value="${e.id}">${e.name} · ${e.rate} €/h</option>`).join('');
+  if (v) sel.value = v;
+}
+
+function onEmpChange() {
+  const id  = parseInt(document.getElementById('sel-emp').value);
+  const emp = employers.find(e => e.id === id);
+  const val = document.getElementById('km-auto-val');
+  const sub = document.getElementById('km-auto-sub');
+  if (!emp) { val.textContent = 'Sélectionnez un employeur'; val.style.color = 'var(--text2)'; sub.textContent = ''; return; }
+  if (emp.kmAller) {
+    const kmAR     = emp.kmAller * 2;
+    const totalKm  = kmAnCourant() + kmAR;
+    const fraisEst = calcFrais(kmAR, Math.max(totalKm, kmAR));
+    val.textContent   = kmAR + ' km A/R';
+    val.style.color   = 'var(--yellow)';
+    sub.textContent   = '≈ ' + fraisEst + ' € frais (barème fiscal' + (vElec ? ' +20% ⚡' : '') + ')';
+  } else {
+    val.textContent = 'Distance non renseignée'; val.style.color = 'var(--pink)';
+    sub.textContent = 'Renseignez la distance dans l\'onglet Employeurs';
+  }
+}
+
+function toggleKmManual() {
+  kmManual = !kmManual;
+  document.getElementById('in-km-manual').style.display = kmManual ? 'block' : 'none';
+  document.getElementById('km-auto-box').style.display  = kmManual ? 'none'  : 'block';
+}
+
+// ── ADD ENTRY ──
+function addEntry() {
+  const id   = parseInt(document.getElementById('sel-emp').value);
+  const date = document.getElementById('in-date').value;
+  const dh   = parseInt(document.getElementById('dur-h').value) || 0;
+  const dm   = parseInt(document.getElementById('dur-m').value) || 0;
+  const note = document.getElementById('in-note').value.trim();
+  if (!id || !date) { toast('⚠️ Employeur et date requis'); return; }
+  if (dh === 0 && dm === 0) { toast('⚠️ Entrez une durée'); return; }
+  const emp    = employers.find(e => e.id === id);
+  const heures = dh + dm / 60;
+  const sal    = Math.round(heures * emp.rate * 100) / 100;
+  let km = 0;
+  if (kmManual) { km = parseFloat(document.getElementById('in-km-manual').value) || 0; }
+  else if (emp.kmAller) { km = emp.kmAller * 2; }
+  const totalKmAn = kmAnCourant() + km;
+  const frais = calcFrais(km, Math.max(totalKmAn, km));
+  entries.unshift({ id: Date.now(), empId: id, empName: emp.name, empColor: emp.color, date, dh, dm, heures: Math.round(heures * 100) / 100, sal, km, frais, note });
+  save(); refreshStats();
+  document.getElementById('dur-h').value = '';
+  document.getElementById('dur-m').value = '';
+  document.getElementById('in-note').value = '';
+  if (kmManual) document.getElementById('in-km-manual').value = '';
+  toast('✅ ' + dh + 'h' + (dm ? dm + 'min' : '') + ' — ' + sal.toFixed(2) + '€');
+}
+
+function delEntry(id) {
+  entries = entries.filter(e => e.id !== id);
+  save(); renderEntries(); refreshStats(); toast('🗑 Supprimé');
+}
+
+// ── STATS ──
+function refreshStats() {
+  refreshEmpSelect();
+  const now = new Date();
+  const me  = entries.filter(e => { const d = new Date(e.date); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); });
+  document.getElementById('st-sal').textContent   = me.reduce((a,e)=>a+e.sal,0).toFixed(2) + ' €';
+  document.getElementById('st-km').textContent    = me.reduce((a,e)=>a+e.km,0) + ' km';
+  document.getElementById('st-h').textContent     = me.reduce((a,e)=>a+e.heures,0).toFixed(1) + 'h';
+  document.getElementById('st-frais').textContent = me.reduce((a,e)=>a+e.frais,0).toFixed(2) + ' €';
+}
+
+// ── HISTORIQUE ──
+function renderEntries() {
+  const list = document.getElementById('list-entries');
+  if (!entries.length) { list.innerHTML = '<div class="empty"><div class="ic">📭</div><p>Aucune saisie pour le moment.</p></div>'; return; }
+  list.innerHTML = entries.slice(0,60).map(e => `
+    <div class="entry-item">
+      <div class="e-dot" style="background:${e.empColor}"></div>
+      <div class="e-info">
+        <div class="e-name">${e.empName}</div>
+        <div class="e-meta">${fmtDate(e.date)} · ${e.dh}h${e.dm?e.dm+'min':''} ${e.note?'· '+e.note:''}</div>
+      </div>
+      <div class="e-amt">
+        <div class="e-sal">${e.sal.toFixed(2)}€</div>
+        ${e.km > 0 ? `<div class="e-km">${e.km}km · ${e.frais.toFixed(2)}€</div>` : ''}
+      </div>
+      <button class="btn-del" onclick="delEntry(${e.id})">✕</button>
+    </div>`).join('');
+}
+
+// ── RECAP ──
+function renderRecap() {
+  const months  = [...new Set(entries.map(e => e.date.substring(0,7)))].sort().reverse();
+  const filters = document.getElementById('month-filters');
+  const content = document.getElementById('recap-content');
+  if (!months.length) { filters.innerHTML = ''; content.innerHTML = '<div class="empty"><div class="ic">📊</div><p>Aucune donnée.</p></div>'; return; }
+  if (!curMonth || !['Annuel',...months].includes(curMonth)) curMonth = months[0];
+  filters.innerHTML = ['Annuel',...months].map(m => `<div class="pill ${m===curMonth?'active':''}" onclick="selMonth('${m}')">${m==='Annuel'?'📅 Annuel':fmtMonth(m)}</div>`).join('');
+  const year = new Date().getFullYear();
+  const list = curMonth === 'Annuel' ? entries.filter(e=>e.date.startsWith(year)) : entries.filter(e=>e.date.startsWith(curMonth));
+  const byEmp = {};
+  list.forEach(e => {
+    if (!byEmp[e.empId]) byEmp[e.empId] = { name: e.empName, color: e.empColor, h: 0, sal: 0, km: 0, frais: 0 };
+    byEmp[e.empId].h     += e.heures;
+    byEmp[e.empId].sal   += e.sal;
+    byEmp[e.empId].km    += e.km;
+    byEmp[e.empId].frais += e.frais;
+  });
+  const vals = Object.values(byEmp);
+  const tS = vals.reduce((a,e)=>a+e.sal,0);
+  const tH = vals.reduce((a,e)=>a+e.h,0);
+  const tK = vals.reduce((a,e)=>a+e.km,0);
+  const tF = vals.reduce((a,e)=>a+e.frais,0);
+  let html = curMonth==='Annuel' ? `<div style="text-align:center;font-size:13px;color:var(--accent);margin-bottom:12px;font-weight:600">📅 Récapitulatif annuel ${year}</div>` : '';
+  html += `<div class="total-bar">
+    <div><div class="tl">Total salaires</div><div class="tv">${tS.toFixed(2)} €</div></div>
+    <div style="text-align:right"><div class="tl">${tH.toFixed(1)}h · ${tK} km</div><div style="font-size:13px;color:var(--yellow);font-family:'DM Mono',monospace">+${tF.toFixed(2)}€ frais km</div></div>
+  </div>`;
+  html += vals.map(e=>`<div class="recap-emp">
+    <div class="recap-name"><div style="width:10px;height:10px;border-radius:3px;background:${e.color}"></div>${e.name}</div>
+    <div class="recap-grid">
+      <div class="rs"><div class="rsv" style="color:var(--accent)">${e.h.toFixed(1)}h</div><div class="rsl">Heures</div></div>
+      <div class="rs"><div class="rsv" style="color:var(--green)">${e.sal.toFixed(2)}€</div><div class="rsl">Salaire</div></div>
+      <div class="rs"><div class="rsv" style="color:var(--yellow)">${e.frais.toFixed(2)}€</div><div class="rsl">${e.km}km frais</div></div>
+    </div>
+  </div>`).join('');
+  html += `<div class="export-grid">
+    <button class="eb eb-csv" onclick="exportCSV(false)">📥 Export mensuel</button>
+    <button class="eb eb-ann" onclick="exportCSV(true)">📅 Export annuel</button>
+    <button class="eb eb-pdf" onclick="window.print()">🖨️ Imprimer / PDF</button>
+  </div>`;
+  content.innerHTML = html;
+}
+
+function selMonth(m) { curMonth = m; renderRecap(); }
+
+function exportCSV(annual) {
+  const y    = new Date().getFullYear();
+  const list = annual ? entries.filter(e=>e.date.startsWith(y)) : entries.filter(e=>e.date.startsWith(curMonth));
+  const per  = annual ? y : curMonth;
+  let csv = 'Date,Employeur,Durée (h),Salaire €,Km A/R,Frais km € (barème fiscal impôts),Note\n';
+  list.forEach(e => { csv += `${e.date},"${e.empName}",${e.heures.toFixed(2)},${e.sal.toFixed(2)},${e.km},${e.frais.toFixed(2)},"${e.note}"\n`; });
+  const tS = list.reduce((a,e)=>a+e.sal,0);
+  const tK = list.reduce((a,e)=>a+e.km,0);
+  const tF = list.reduce((a,e)=>a+e.frais,0);
+  const tH = list.reduce((a,e)=>a+e.heures,0);
+  csv += `\nTOTAL,,${tH.toFixed(2)},${tS.toFixed(2)},${tK},${tF.toFixed(2)},\n`;
+  csv += `\nBarème fiscal 2024 · ${vCV} CV${vElec?' électrique (+20%)':''}\n`;
+  const a = document.createElement('a');
+  a.href     = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8;'}));
+  a.download = `heures_${per}.csv`;
+  a.click();
+  toast('📥 Fichier téléchargé !');
+}
+
+// ── SAUVEGARDE / RESTAURATION ──
+function backupData() {
+  const data = {
+    version: 1,
+    date: new Date().toISOString(),
+    employers,
+    entries,
+    homeAddr,
+    vCV,
+    vElec
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'mesheures_sauvegarde_' + new Date().toISOString().split('T')[0] + '.json';
+  a.click();
+  toast('💾 Sauvegarde téléchargée !');
+}
+
+function restoreData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.version || !data.employers || !data.entries) { toast('❌ Fichier invalide'); return; }
+      if (!confirm('Restaurer les données ? Cela remplacera toutes vos données actuelles.')) return;
+      employers = data.employers || [];
+      entries   = data.entries   || [];
+      homeAddr  = data.homeAddr  || '';
+      vCV       = data.vCV       || 4;
+      vElec     = data.vElec     || false;
+      save();
+      renderEmployeurs();
+      refreshStats();
+      toast('✅ Données restaurées avec succès !');
+    } catch(err) {
+      toast('❌ Erreur lors de la restauration');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ── HELPERS ──
+function fmtDate(d)  { return new Date(d+'T00:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short'}); }
+function fmtMonth(m) { const [y,mo]=m.split('-'); return new Date(y,mo-1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'}); }
+
+// ── INIT ──
+document.getElementById('currentDate').textContent = new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'});
+document.getElementById('in-date').value = new Date().toISOString().split('T')[0];
+document.getElementById('home-display').textContent = homeAddr || 'Non renseigné';
+refreshStats();
+
+// ── SERVICE WORKER (PWA) ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(() => console.log('✅ Service Worker enregistré'))
+    .catch(err => console.log('SW error:', err));
+}
+</script>
+</body>
+</html>
